@@ -31,7 +31,10 @@ def home():
 @app.route('/about.html')
 def about():
     return render_template('about.html')
-
+@app.route('/<page>.html')
+def pages (page):
+    page_url = page + '.html'
+    return render_template(page_url)
 @app.route('/login.html', methods=['GET', 'POST'] )
 def login ():
     if request.method == 'POST':
@@ -46,3 +49,7 @@ def login ():
            flash('user or pass is wrong')
 
     return render_template('login.html')
+
+
+if __name__ == "__main__":
+    app.run(port = 4500 , debug = True)
