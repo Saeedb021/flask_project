@@ -35,15 +35,23 @@ def pages (page):
     return render_template(page_url)
 
 
-@app.route('/page3.html')
+@app.route('/post_blog.html', methods=['GET', 'POST'])
 @login_required
 def blog ():
-    titel = "بلاگ اول"
-    blog_body = "خب اینم از شروع بلاگ"
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
 
-    return render_template('page3.html' , title = titel, body = blog_body)
+        return show_blog(title, description)
+        return redirect('/page3.html')
+    return render_template('post_blog.html')
+
+@app.route('/page3.html')
+@login_required
+def show_blog(title, body):
 
 
+    return render_template('page3.html', title = title , body = body)
 
 
 @app.route('/login.html', methods=['GET', 'POST'] )
@@ -54,7 +62,7 @@ def login ():
         if username == "saeed" and password == "pass":
 
            login_user(user)
-           return redirect('/page3.html')
+           return redirect('/post_blog.html')
         if user != 'saeed' or password != 'pass' :
 
            flash('user or pass is wrong')
