@@ -49,9 +49,12 @@ def blog ():
 @app.route('/page3.html')
 @login_required
 def show_blog(title, body):
+    print (body)
+    #text = body.split('\n')
+    text= body.replace('\n', '<br>')
 
 
-    return render_template('page3.html', title = title , body = body)
+    return render_template('page3.html', title = title , text = text)
 
 
 @app.route('/login.html', methods=['GET', 'POST'] )

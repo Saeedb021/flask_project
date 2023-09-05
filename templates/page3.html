@@ -8,9 +8,9 @@
     <div class="card-content-text">
         <h3 class="card-title mbr-fonts-style mbr-white mt-3 mb-4 display-2"><strong>{{title}}</strong></h3>
     <div class="item-wrapper">
-
-      <p class="mbr-text mbr-fonts-style display-7">{{body}}</p>
-
+      {% autoescape false %}
+      <p class="mbr-text mbr-fonts-style display-7">{{text}}</p>
+       {% endautoescape %}
     </div>
 
 {% endblock blog %}
