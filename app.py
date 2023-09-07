@@ -46,15 +46,18 @@ def read_db(url):
     #sql = """SELECT url, title , body FROM blog_tb WHERE url =%s;"""
     cur.execute("SELECT url, title , body FROM blog_tb WHERE url = %s ", (url,))
     all = cur.fetchall()
-    blog = all[0]
-    title = blog[1]
-    body = blog[2]
+    if len(all) == 0:
+        return ('404')
+    else :
+        blog = all[0]
+        title = blog[1]
+        body = blog[2]
     #print(title)
     #print(body)
 
-    cur.close()
+        cur.close()
 
-    return(title, body)
+        return(title, body)
 
 
 
@@ -100,14 +103,19 @@ def blog ():
 @app.route('/<page>')
 def show_blog(page):
 
-    title, body = read_db(page)
+    if read_db(page) == '404':
+        return render_template('404.html')
 
-    print (body)
-    text = body.split('\n')
-    text= body.replace('\n', '<br>')
+    else :
+
+        title, body = read_db(page)
 
 
-    return render_template('page3.html', title = title , text = text)
+        text = body.split('\n')
+        text= body.replace('\n', '<br>')
+
+
+        return render_template('page3.html', title = title , text = text)
 
 
 @app.route('/login', methods=['GET', 'POST'] )
