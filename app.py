@@ -1,6 +1,6 @@
 from flask import Flask, flash ,Response,  render_template, request , redirect
 from flask_login import UserMixin ,current_user, LoginManager,login_user, logout_user,login_required
-#import sql_try
+
 login_manager = LoginManager()
 app = Flask(__name__)
 login_manager.init_app(app)
