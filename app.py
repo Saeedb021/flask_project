@@ -25,6 +25,24 @@ class User(UserMixin):
 
 user = User(0)
 
+def is_login(place):
+    if place == "blog":
+        if current_user.is_authenticated:
+            m ="bace_blag.html"
+        else :
+            m ="bace_blag_anon.html"
+        return(m)
+    if place == 'pages':
+        if current_user.is_authenticated:
+            m ="bace_pages.html"
+        else :
+            m ="bace_pages_anon.html"
+        return(m)
+
+
+
+
+
 def insert_blog(url, title, body):
     cur = conn.cursor()
 
@@ -56,18 +74,21 @@ def read_db(url):
 
 
 
+
+
 @app.route('/')
 @app.route('/index.html')
 def home():
-    return render_template('index.html')
+    return render_template('index.html' ,m = is_login('pages'))
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template('about.html', m = is_login('pages'))
+
 
 @app.route('/contacts')
 def contacts():
-    return render_template('contacts.html')
+    return render_template('contacts.html', m = is_login('pages'))
 
 
 @app.route('/post_blog', methods=['GET', 'POST'])
@@ -86,18 +107,24 @@ def blog ():
 @app.route('/<page>')
 def show_blog(page):
 
+
+
     if read_db(page) == '404':
         return render_template('404.html')
 
     else :
 
         title, body = read_db(page)
-
         text = body.split('\n')
         text= body.replace('\n', '<br>')
+        return render_template('blogs.html', title = title , text = text , m = is_login('blog'))
 
 
-        return render_template('page3.html', title = title , text = text)
+
+
+
+
+
 
 
 @app.route('/login', methods=['GET', 'POST'] )
