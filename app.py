@@ -1,13 +1,21 @@
-from flask import Flask, flash ,Response,  render_template, request , redirect
+from flask import Flask, flash ,Response,  render_template, request , redirect, url_for
 from flask_login import UserMixin ,current_user, LoginManager,login_user, logout_user,login_required
 import psycopg2
 import config
+from werkzeug.utils import secure_filename
+import os
+
+UPLOAD_FOLDER = os.path.join('static/upload')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 login_manager = LoginManager()
 app = Flask(__name__)
 login_manager.init_app(app)
+login_manager.login_message = "You need to be logged in to view this page"
+login_manager.login_message_category = "warning"
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 login_manager.login_view = "login"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 conn = psycopg2.connect( host= config.host, database= config.database , user= config.user
         , password=config.password)
@@ -39,16 +47,20 @@ def is_login(place):
             m ="bace_pages_anon.html"
         return(m)
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 
 
-def insert_blog(url, title, body):
+
+def insert_blog(url, title, body, image):
     cur = conn.cursor()
 
-    sql = """INSERT INTO blog_tb(url, title, body) VALUES(%s, %s, %s);"""
+    sql = """INSERT INTO blog(url, title, body,image) VALUES(%s, %s, %s, %s);"""
 
-    cur.execute(sql, (url, title, body))
+    cur.execute(sql, (url, title, body, image))
 
     # commit the changes to the database
     conn.commit()
@@ -59,7 +71,7 @@ def insert_blog(url, title, body):
 def read_db(url):
     cur = conn.cursor()
 
-    cur.execute("SELECT url, title , body FROM blog_tb WHERE url = %s ", (url,))
+    cur.execute("SELECT url, title , body, image FROM blog WHERE url = %s ", (url,))
     all = cur.fetchall()
     if len(all) == 0:
         return ('404')
@@ -67,10 +79,11 @@ def read_db(url):
         blog = all[0]
         title = blog[1]
         body = blog[2]
+        image = blog[3]
 
         cur.close()
 
-        return(title, body)
+        return(title, body,image)
 
 
 
@@ -98,7 +111,21 @@ def blog ():
         url = request.form['Url']
         title = request.form['title']
         description = request.form['description']
-        insert_blog(url, title, description)
+        if 'file' not in request.files:
+            flash('No file part', 'warning')
+            return redirect(request.url)
+        file = request.files['file']
+            # if user does not select file, browser also
+            # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file','warning')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        insert_blog(url, title, description, filename)            # check if the post request has the file part
+
 
 
         return redirect(f'/{url}')
@@ -107,17 +134,23 @@ def blog ():
 @app.route('/<page>')
 def show_blog(page):
 
-
-
     if read_db(page) == '404':
         return render_template('404.html')
 
     else :
 
-        title, body = read_db(page)
+        title, body, image = read_db(page)
         text = body.split('\n')
         text= body.replace('\n', '<br>')
-        return render_template('blogs.html', title = title , text = text , m = is_login('blog'))
+        image = 'static/upload/'+ image
+        return render_template('blogs.html', title = title , text = text ,image = image , m = is_login('blog'))
+
+@app.route('/post_blog', methods=['GET', 'POST'])
+def upload_file():
+
+
+    return render_template('postp.html')
+
 
 
 
@@ -135,10 +168,10 @@ def login ():
         if username == "saeed" and password == "pass":
 
            login_user(user)
-           return redirect('/post_blog')
+           return redirect('/')
         if user != 'saeed' or password != 'pass' :
 
-           flash('user or pass is wrong')
+           flash('username or password is wrong', 'danger')
 
     return render_template('login.html')
 
@@ -146,6 +179,7 @@ def login ():
 @login_required
 def logout():
     logout_user()
+    flash('Logged out', 'success')
     return redirect('/login')
 
 

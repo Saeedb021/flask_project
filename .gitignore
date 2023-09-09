@@ -2,3 +2,4 @@
 __pycache__/
 venv/
 psycopg2/
+static/upload/*

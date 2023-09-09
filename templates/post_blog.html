@@ -75,8 +75,16 @@
 
 
       		          <h1 class="card-title mbr-fonts-style mbr-white mt-3 mb-4 display-2">ساخت پست</h1>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
 
-      		            <form action="" method="POST" class="mbr-form form-with-styler">
+                    {% endif %}
+                    {% endwith %}
+
+      		            <form action="" method="POST" enctype="multipart/form-data" class="mbr-form form-with-styler">
 
 
                             <div class="mbr-text mbr-fonts-style display-7">
@@ -95,16 +103,20 @@
       		                            <label for="description" class="mbr-text mbr-fonts-style display-7">متن</label>
       		                              <textarea rows="5" class="form-control mbr-text mbr-fonts-style display-7 " name="description" ></textarea>
       		                              </div>
+                                        <form method="POST" enctype="multipart/form-data">
+                                          <div class="mbr-text mbr-fonts-style display-7">
+                                            <label for="file" class="mbr-text mbr-fonts-style display-7">عکس</label>
+
+                                            <input type="file" id="myFile"  class="form-control mbr-text mbr-fonts-style display-7 " name="file">
+
+                                            <a class="btn btn-default" href="/" >لغو</a>
+                                            <button type="submit" class="btn btn-black display-4" >پست</button>
 
 
-      		    <div class="mbr-text mbr-fonts-style display-7">
-      		        <button class="btn btn-default" >
-      		            لغو
-      		        </button>
-      		        <button type="submit" class="btn btn-black display-4">
-      		            پست
-      		        </button>
-      		    </div>
+                                          </div>
+                                        </form>
+
+
 
       	</form>
 
